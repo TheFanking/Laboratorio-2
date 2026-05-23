@@ -92,15 +92,24 @@ El control combina una estrategia proporcional para el mantenimiento de pasillos
 
 A continuación, se presentan las gráficas comparativas de las señales durante las pruebas:
 
-### Comparativa de Señales Frontales en Tiempo Real
+### A. Comparativa de Señales Frontales en Tiempo Real de Entorno Simple
 ![Comparativa de Señales](multimedia/grafico_entornosimple.png)
 
-### Análisis Detallado del Gráfico (Muestreo de 200 Segundos):
+#### Análisis Detallado del Gráfico (Muestreo de 200 Segundos):
 Al evaluar la gráfica obtenida a partir del archivo de logs, se evidencian de forma clara las ventajas de la fusión sensorial frente al procesamiento convencional:
 
 * **Supresión Eficiente del Ruido Blanco:** En los tramos horizontales superiores (por ejemplo, entre los segundos 10 y 65 o entre 165 y 180), la línea naranja (`Sensor_Metros`) muestra un comportamiento varianza de alta frecuencia debido a las interferencias inherentes del sensor. En contraste, la línea azul (`Kalman_Distancia`) cruza de manera sólida y completamente suavizada por el centro de la nube de datos, demostrando que el filtro discrimina de forma óptima el ruido eléctrico y ambiental, previniendo micro-oscilaciones en los motores.
 * **Respuesta Dinámica Ante Obstáculos:** Periódicamente (en los segundos 65, 80, 95, 110, 128, etc.), la distancia cae abruptamente en caída libre. Estos eventos representan el momento exacto en que el robot encuentra una pared al frente. La línea azul acompaña la caída de la línea naranja sin retrasos significativos (*time-lags*), lo que comprueba que la Ganancia de Kalman ($K_k$) se eleva correctamente priorizando la medición real cuando el entorno cambia de forma imprevista, asegurando una evasión oportuna.
 * **Estabilización en Espacio Despejado:** Cuando el robot completa su giro de 90° y el frente queda libre, ambas señales regresan al límite superior calibrado de $0.05\text{ m}$, manteniendo al robot en velocidad de crucero constante hasta el próximo muro.
+
+### B. Comparativa de Señales Frontales en Tiempo Real de Entorno Complejo
+![Comparativa de Señales](multimedia/grafico_entornocomplejo.png)
+
+#### Análisis Detallado del Gráfico Complejo (Muestreo de 600 Segundos):
+La extensión del tiempo de muestreo a 10 minutos permitió registrar un volumen de 18,750 muestras, revelando patrones cinemáticos de alta exigencia:
+* **Periodicidad y Densidad de Eventos de Evasión:** A diferencia de la gráfica del entorno simple, donde las caídas son distanciadas, la señal en el entorno complejo se compone de ráfagas cíclicas y continuas de aproximación extrema. Esto refleja de forma fidedigna que el robot está inmerso en una topología cerrada que lo obliga a conmutar sus estados lógicos de maniobra con una frecuencia hasta tres veces mayor.
+* **Robustez Frente a la Fatiga del Filtro:** A pesar de la acumulación de errores de odometría debido a las constantes rotaciones sobre el eje, la línea azul (`Kalman_Distancia`) no sufre desviaciones temporales ni descalibraciones en su horizonte estacionario. La estimación permanece estable en el centro de la varianza del sensor, validando la estrategia de congelar la etapa de predicción durante las velocidades angulares puras.
+* **Recuperaciones Limpias:** Cada pico hacia los $0.040\text{ m}$ es corregido inmediatamente hacia los $0.050\text{ m}$ por la secuencia cíclica temporizada de despegue (retroceso), demostrando gráficamente la resiliencia del controlador para restablecer la navegación sin perderse en estados indefinidos.
 
 ---
 
@@ -110,14 +119,21 @@ Para evaluar el desempeño de la navegación reactiva fusionada, se diseñaron y
 ### A. Entorno 1: Ambiente Simple (Pocos obstáculos)
 ![Entorno Simple](multimedia/entornosimple.png)
 
-* **Descripción:** Espacio delimitado con obstáculos cilíndricos aislados y amplias zonas despejadas para el tránsito.
-* **Comportamiento del Robot y Estabilidad:** El e-puck mostró un comportamiento impecable. Avanzó en trayectorias rectas perfectas hacia los cilindros. Al cruzar el umbral de los 5 cm, realizó la maniobra de retroceso y giro de escape con precisión, retomando la navegación rectilínea inmediatamente después sin registrar titubeos ni giros falsos en zonas abiertas.
+* **Descripción:** Este escenario consiste en un circuito cerrado y delimitado con obstáculos aislados, diseñado específicamente para que el robot **siga una trayectoria o recorrido secuencial predefinido**. El e-puck dispone de pasillos limpios para transitar de forma predecible antes de encontrarse con una colisión frontal.
+* **Comportamiento del Robot y Estabilidad:** Bajo esta configuración de trayectoria guiada, el e-puck mostró un desplazamiento rectilíneo altamente estable. Al aproximarse a un obstáculo de forma perpendicular, la distancia estimada por el Filtro de Kalman disminuyó de manera suave y continua. Al cruzar el umbral de seguridad, el robot realizó rotaciones limpias hacia el flanco con mayor espacio libre y reanudó la marcha sin registrar oscilaciones, logrando completar el circuito trazado de forma fluida.
 
-### B. Entorno 2: Ambiente Complejo (Pasillos estrechos y giros cerrados)
-![Entorno Complejo](escenario_complejo.jpg)
+### B. Entorno 2: Ambiente Complejo (Más obstáculos)
+![Entorno Complejo](multimedia/entornocomplejo.png)
 
-* **Descripción:**
-* **Comportamiento del Robot y Capacidad de Evasión:** 
+* **Descripción:** Este escenario simula una pista cerrada tipo laberinto caracterizada por paredes continuas, esquinas consecutivas, pasillos estrechos y una alta densidad de obstáculos cúbicos interconectados. A diferencia del primer entorno, aquí **el robot no tiene una trayectoria establecida y se mueve de manera autónoma explorando todo el espacio disponible**. Debido a que el movimiento es disperso y el mapa posee un número significativamente mayor de objetos, **el experimento se dejó correr durante 10 minutos continuos (600 segundos)** para permitir al e-puck cubrir y resolver la mayor cantidad de zonas posibles.
+* **Comportamiento del Robot y Capacidad de Evasión:** A lo largo de la exploración libre, el robot exhibió un alto desempeño adaptativo. El control proporcional lateral estabilizó la marcha centrándolo de forma automática en los pasillos angostos mediante la lectura de `ps2` y `ps5`. Al toparse con los obstáculos frontales distribuidos aleatoriamente, el Filtro de Kalman registró las aproximaciones con precisión, gatillando las secuencias coordinadas de retroceso y rotación sobre su propio eje sin registrar colisiones destructivas ni atascos estructurales.
+
+#### Caso de Borde Identificado (Limitación del Algoritmo Reactivo):
+Durante pruebas de estrés prolongadas en el entorno complejo, se identificó un escenario muy particular en el cual el robot puede llegar a quedar atrapado de forma intermitente. Esto ocurre cuando el e-puck impacta de manera perfectamente frontal y perpendicular contra la arista o esquina de un objeto cúbico centrado respecto a su eje de simetría.
+
+* **Análisis de la Falla:** Al aproximarse en un ángulo de 90° perfectos, los sensores frontales (`ps0` y `ps7`) registran exactamente la misma distancia, activando correctamente la maniobra de retroceso. Sin embargo, al momento de decidir el sentido de giro, los sensores laterales izquierdo (`ps5`) y derecho (`ps2`) devuelven lecturas idénticas o simétricas debido a la equidistancia de las paredes del entorno. 
+* **Efecto en el Comportamiento:** Aunque el código cuenta con una regla por defecto para forzar un giro en caso de igualdad empírica, las micro-variaciones por fricción en las ruedas simuladas o el ruido de alta frecuencia en el microsegundo exacto de la toma de datos pueden causar que el robot alterne erráticamente entre girar a la izquierda y a la derecha en ciclos consecutivos. Esto genera un bucle de oscilación (*chattering*) donde el robot retrocede, intenta girar a un lado, vuelve a detectar simetría y cancela la evasión, quedando atrapado temporalmente en el mismo lugar.
+* **Propuesta de Mejora Futura:** Para resolver esta limitación geométrica sin alterar la naturaleza reactiva del controlador, se propone integrar un mecanismo de ruptura de simetría probabilístico en la toma de decisiones (usando funciones pseudoaleatorias como `random.choice([-1, 1])`), forzando al robot a romper el bucle matemático y escapar inmediatamente de colisiones perpendiculares perfectas.
 
 ---
 
@@ -127,9 +143,20 @@ Para evaluar el desempeño de la navegación reactiva fusionada, se diseñaron y
 
 ---
 
-## 11. Instrucciones para Ejecutar la Simulación
-Para replicar las pruebas de este controlador, siga los siguientes pasos:
+## 11. Instrucciones para Ejecutar la Simulación (Descarga Directa)
 
-1. Descargue o clone este repositorio en su máquina local:
-   ```bash
-   git clone [https://github.com/TheFanking/Laboratorio-2.git]
+Siga estos pasos para descargar el proyecto de forma manual sin utilizar la terminal:
+
+### A. Requisitos Previos
+* **Webots:** Instalado en su última versión estable.
+* **Python 3.X:** Configurado en las variables de entorno del sistema (`PATH`).
+
+### B. Descarga del Proyecto
+* **Descargar ZIP:** Entre al enlace del repositorio en GitHub (`https://github.com/TheFanking/Laboratorio-2`).
+* **Extraer Archivos:** Haga clic en el botón verde **Code** (esquina superior derecha), seleccione **Download ZIP** y descomprima el archivo en cualquier carpeta de su computador.
+
+### C. Ejecución en Webots
+* **Cargar el Mundo:** Inicie Webots, diríjase a `File` > `Open World...` y abra el archivo `.wbt` del escenario deseado (Simple o Complejo) dentro de la carpeta descomprimida.
+* **Asignar Controlador:** En el panel izquierdo de Webots, expanda las propiedades del robot **e-puck** y verifique que el campo `controller` apunte al script de Python del proyecto.
+* **Solución de errores:** Si Webots no detecta el entorno, vaya a `Tools` > `Preferences` > `Python Command` y pegue la ruta del ejecutable de su Python local.
+* **Simular:** Presione el botón **Play** o **Fast** en la barra superior para iniciar la navegación autónoma con el Filtro de Kalman. Las salidas de telemetría se desplegarán en la consola inferior en tiempo real.
