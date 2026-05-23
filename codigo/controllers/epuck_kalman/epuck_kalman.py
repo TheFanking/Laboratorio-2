@@ -1,8 +1,6 @@
 from controller import Robot
 import csv
 
-# TODO: Al inicializar los sensores de navegación estos dan valores extraños (negativos y de alli se regula)
-
 MODO_DATOS: str = 'kalman'
 """ Define los datos que utilizara el sistema de navegación reactiva """
 
@@ -98,7 +96,6 @@ def init_motores():
     right_motor = robot.getDevice('right wheel motor')
     left_motor.setPosition(float('inf'))
     right_motor.setPosition(float('inf'))
-    # El robot solo avanza lento para recolectar datos
     left_motor.setVelocity(0.2 * MAX_SPEED)
     right_motor.setVelocity(0.2 * MAX_SPEED)
     return left_motor, right_motor
@@ -109,7 +106,6 @@ def init_sensoresdistancia():
     ps0.enable(TIME_STEP)
     ps7.enable(TIME_STEP)
 
-    # Y usamos ps2 y ps5 como sensores laterales para la lógica de navegación
     ps2 = robot.getDevice('ps2') # Derecho
     ps5 = robot.getDevice('ps5') # Izquierdo
     ps2.enable(TIME_STEP)
@@ -171,9 +167,7 @@ def compute_motor_speeds(front_distance_meters, left_sensor_raw, right_sensor_ra
     Decide la velocidad de los motores basándose en la distancia frontal
     y los sensores laterales (ps6 y ps1).
     """
-    #print(f"Distancia frontal (m): {front_distance_meters:.3f}")
-    #print(f"Sensor izquierdo (crudo): {left_sensor_raw:.3f}, Sensor derecho (crudo): {right_sensor_raw:.3f}")
-    
+
     # Velocidad base de crucero (la mitad de la máxima)
     base_speed = 0.5 * max_speed
 
