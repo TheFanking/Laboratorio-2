@@ -84,7 +84,7 @@ La toma de decisiones del robot se basa en una máquina de estados con umbrales 
 A continuación, se presentan las gráficas comparativas de las señales durante las pruebas:
 
 ### [Insertar Gráfico 1: Comparativa de Señales Frontales]
-![Comparativa de Señales](grafico_sensores.png)
+![Comparativa de Señales](multimedia/grafico_entornosimple.png)
 
 ### Análisis del Gráfico:
 Al observar el comportamiento de las señales temporales capturadas durante el experimento, se pueden identificar con claridad las tres fases del trayecto del robot y cómo responde cada algoritmo:
@@ -98,7 +98,7 @@ Al observar el comportamiento de las señales temporales capturadas durante el e
 Para evaluar el desempeño de la navegación reactiva fusionada, se diseñaron y ejecutaron simulaciones en dos entornos con niveles de dificultad incremental dentro de Webots:
 
 ### A. Entorno 1: Ambiente Simple (Pocos obstáculos)
-![Entorno Simple](escenario_simple.jpg)
+![Entorno Simple](multimedia/entornosimple.jpg)
 
 * **Descripción:** Este escenario consiste en un espacio abierto delimitado donde se posicionaron obstáculos cilíndricos aislados y distanciados entre sí. El robot dispone de zonas despejadas de tránsito antes de encontrarse con una colisión frontal.
 * **Comportamiento del Robot y Estabilidad:** El e-puck mostró un desplazamiento rectilíneo altamente estable. Al aproximarse a un cilindro de forma perpendicular, la distancia estimada por el Filtro de Kalman disminuyó de manera suave y continua. Al cruzar el umbral de seguridad, el robot realizó rotaciones limpias hacia el flanco con mayor espacio libre (determinado por los sensores ps2 y ps5) y reanudó la marcha sin registrar oscilaciones, frenadas intermitentes ni giros falsos.
