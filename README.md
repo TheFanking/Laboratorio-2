@@ -1,5 +1,5 @@
 # Laboratorio 2: Navegación Reactiva con Filtrado y Fusión de Sensores en Webots
-## Asignatura: Robótica y Sistemas Autónomos (ICI 4150)
+## Asignatura: Robótica y Sistemas Autónomos (ICI4150-2)
 
 ### Integrantes:
 * Alfredo Escobar
